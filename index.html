@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ד"ר שלמה ברונק - אורתופד מנתח | ברכיים ופציעות ספורט</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function(){
+            emailjs.init("FKkmN1RQmu2tsfL7H");
+        })();
+    </script>
     <style>
         * {
             margin: 0;
@@ -428,8 +434,14 @@
         document.getElementById('contactForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            // Disable submit button to prevent double submission
+            const submitBtn = e.target.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'שולח...';
+            submitBtn.disabled = true;
+            
             // Get form data
-            const formData = {
+            const templateParams = {
                 name: document.getElementById('name').value,
                 id: document.getElementById('id').value,
                 phone: document.getElementById('phone').value,
@@ -437,29 +449,29 @@
                 message: document.getElementById('message').value
             };
 
-            // Create email body
-            const emailBody = `
-שם: ${formData.name}
-תעודת זהות: ${formData.id}
-נייד: ${formData.phone}
-דוא"ל: ${formData.email}
-
-הודעה:
-${formData.message}
-            `;
-
-            // Create mailto link
-            const mailtoLink = `mailto:bronakclinic@gmail.com?subject=פנייה חדשה מאתר - ${formData.name}&body=${encodeURIComponent(emailBody)}`;
-            
-            // Open email client
-            window.location.href = mailtoLink;
-            
-            // Show success modal
-            const modal = document.getElementById('successModal');
-            modal.classList.add('show');
-            
-            // Reset form
-            this.reset();
+            try {
+                // Send email using EmailJS
+                await emailjs.send(
+                    'service_6sx5z1d',
+                    'template_8w8si95',
+                    templateParams
+                );
+                
+                // Show success modal
+                const modal = document.getElementById('successModal');
+                modal.classList.add('show');
+                
+                // Reset form
+                this.reset();
+                
+            } catch (error) {
+                console.error('Error sending email:', error);
+                alert('שגיאה בשליחת ההודעה. אנא נסה שוב או צור קשר ישירות במייל.');
+            } finally {
+                // Re-enable submit button
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
         });
 
         // ID validation - Israeli ID
